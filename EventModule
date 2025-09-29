@@ -1,0 +1,27 @@
+local EventModule = {}
+
+function EventModule.Disco(player, args)
+	print(player.Name.." запустил Disco!")
+end
+
+function EventModule.CrabRave(player, args)
+	print(player.Name.." запустил Crab Rave!")
+end
+
+function EventModule.Moon(player, args)
+	print(player.Name.." сделал Луну!")
+end
+
+function EventModule.Galaxy(player, args)
+	print(player.Name.." сделал Галактику!")
+end
+
+function EventModule.Nuclear(player, args)
+	print(player.Name.." запустил Ядерку!")
+end
+
+function EventModule.SpawnNPC(player, args)
+	print(player.Name.." заспавнил NPC!")
+end
+
+return EventModule
