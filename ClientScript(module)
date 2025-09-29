@@ -1,0 +1,114 @@
+-- Сервисы
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+
+-- Подключаем модули
+local ConfigModule = require(ReplicatedStorage:WaitForChild("ConfigModule"))
+local PermissionModule = require(ReplicatedStorage:WaitForChild("PermissionModule"))
+local CommandHandlerModule = require(ReplicatedStorage:WaitForChild("CommandHandlerModule"))
+local LoggerModule = require(ReplicatedStorage:WaitForChild("LoggerModule"))
+local LoggerFileModule = require(ReplicatedStorage:WaitForChild("LoggerFileModule"))
+local KickModule = require(ReplicatedStorage:WaitForChild("KickModule"))
+local BlinkModule = require(ReplicatedStorage:WaitForChild("BlinkModule"))
+local GUIHelperModule = require(ReplicatedStorage:WaitForChild("GUIHelperModule"))
+local CooldownModule = require(ReplicatedStorage:WaitForChild("CooldownModule"))
+local ChatModule = require(ReplicatedStorage:WaitForChild("ChatModule"))
+local TeleportModule = require(ReplicatedStorage:WaitForChild("TeleportModule"))
+local ThemeModule = require(ReplicatedStorage:WaitForChild("ThemeModule"))
+local QuickCommandModule = require(ReplicatedStorage:WaitForChild("QuickCommandModule"))
+local SettingsModule = require(ReplicatedStorage:WaitForChild("SettingsModule"))
+local EventTrackerModule = require(ReplicatedStorage:WaitForChild("EventTrackerModule"))
+
+-- Проверка админки
+if not PermissionModule.IsAdmin(player) then return end
+
+-- ================== GUI ==================
+local playerGui = player:WaitForChild("PlayerGui")
+local screenGui = Instance.new("ScreenGui", playerGui)
+screenGui.Name = "AdminPanel"
+screenGui.Enabled = false
+
+local frame = Instance.new("Frame", screenGui)
+frame.Size = UDim2.new(0, ConfigModule.GUIWidth, 0, ConfigModule.GUIHeight)
+frame.Position = UDim2.new(0.5, -ConfigModule.GUIWidth/2, 0.5, -ConfigModule.GUIHeight/2)
+frame.BackgroundColor3 = ThemeModule.Colors.Background
+local uiCorner = Instance.new("UICorner", frame)
+uiCorner.CornerRadius = UDim.new(0,15)
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1,0,0,40)
+title.BackgroundTransparency = 1
+title.Text = "Админ Панель"
+title.Font = Enum.Font.FredokaOne
+title.TextScaled = true
+title.TextColor3 = ThemeModule.Colors.Text
+
+-- TextBox для команд
+local commandBox = Instance.new("TextBox", frame)
+commandBox.Size = UDim2.new(1,-20,0,40)
+commandBox.Position = UDim2.new(0,10,0,50)
+commandBox.PlaceholderText = "Введите команду (/kick PlayerName)"
+commandBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
+commandBox.TextColor3 = ThemeModule.Colors.Text
+local uiCorner2 = Instance.new("UICorner", commandBox)
+uiCorner2.CornerRadius = UDim.new(0,10)
+
+-- Кнопка Выполнить
+local executeBtn = Instance.new("TextButton", frame)
+executeBtn.Size = UDim2.new(0,150,0,40)
+executeBtn.Position = UDim2.new(0.5,-75,1,-50)
+executeBtn.Text = "Выполнить"
+executeBtn.BackgroundColor3 = ThemeModule.Colors.Button
+executeBtn.TextColor3 = ThemeModule.Colors.Text
+local uiCorner3 = Instance.new("UICorner", executeBtn)
+uiCorner3.CornerRadius = UDim.new(0,10)
+
+-- ================== Быстрые кнопки ==================
+local quickBtn1 = QuickCommandModule.CreateQuickButton(frame, "Kick", function()
+	local targetName = commandBox.Text
+	if targetName ~= "" then
+		KickModule.KickPlayer(Players:FindFirstChild(targetName))
+		LoggerModule.Log(player.Name.." кикнул "..targetName)
+		LoggerFileModule.AddLog(player.Name.." кикнул "..targetName)
+	end
+end)
+quickBtn1.Position = UDim2.new(0,10,0,100)
+
+local quickBtn2 = QuickCommandModule.CreateQuickButton(frame, "Blink", function()
+	BlinkModule.BlinkPlayer(player)
+	LoggerModule.Log(player.Name.." использовал Blink")
+	LoggerFileModule.AddLog(player.Name.." Blink")
+end)
+quickBtn2.Position = UDim2.new(0,120,0,100)
+
+-- ================== Выполнение команды из TextBox ==================
+executeBtn.MouseButton1Click:Connect(function()
+	local msg = commandBox.Text
+	if msg == "" then return end
+
+	local split = string.split(msg, " ")
+	local cmd = split[1]:lower():gsub("/", "")
+	table.remove(split,1)
+
+	if CooldownModule.IsOnCooldown(player, cmd) then
+		ChatModule.SendMessage(player, "Команда на кулдауне!")
+		return
+	end
+
+	CommandHandlerModule.RunCommand(cmd, player, split)
+	CooldownModule.SetCooldown(player, cmd, 3)
+	LoggerModule.Log(player.Name.." выполнил "..cmd)
+	LoggerFileModule.AddLog(player.Name.." "..cmd)
+	commandBox.Text = ""
+end)
+
+-- ================== F2 Открытие/Закрытие ==================
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.KeyCode == Enum.KeyCode.F2 then
+		screenGui.Enabled = not screenGui.Enabled
+	end
+end)
+
