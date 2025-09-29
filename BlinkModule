@@ -1,0 +1,11 @@
+local BlinkModule = {}
+
+function BlinkModule.BlinkPlayer(player, distance)
+	distance = distance or 20
+	if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+		local hrp = player.Character.HumanoidRootPart
+		hrp.CFrame = hrp.CFrame + hrp.CFrame.LookVector * distance
+	end
+end
+
+return BlinkModule
