@@ -1,0 +1,25 @@
+local Players = game:GetService("Players")
+local CommandModule = {}
+
+function CommandModule.Ban(player, args)
+	if args[1] then
+		local target = Players:FindFirstChild(args[1])
+		if target then target:Kick("Забанен админом "..player.Name) end
+	end
+end
+
+function CommandModule.Kick(player, args)
+	if args[1] then
+		local target = Players:FindFirstChild(args[1])
+		if target then target:Kick("Кикнут админом "..player.Name) end
+	end
+end
+
+function CommandModule.Blink(player, args)
+	if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+		local hrp = player.Character.HumanoidRootPart
+		hrp.CFrame = hrp.CFrame + hrp.CFrame.LookVector * 20
+	end
+end
+
+return CommandModule
