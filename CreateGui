@@ -1,0 +1,68 @@
+local FrameModule = {}
+
+function FrameModule.CreateFrame(player)
+	local playerGui = player:WaitForChild("PlayerGui")
+
+	-- Создаём ScreenGui
+	local screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "AdminGUI"
+	screenGui.Enabled = false -- по умолчанию скрыт
+	screenGui.Parent = playerGui
+
+	-- Создаём Frame
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(0, 400, 0, 150)
+	frame.Position = UDim2.new(0.5, -200, 0.5, -75)
+	frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+	frame.Parent = screenGui
+
+	local uiCorner = Instance.new("UICorner")
+	uiCorner.CornerRadius = UDim.new(0,15)
+	uiCorner.Parent = frame
+
+	-- Заголовок
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.new(1,0,0,40)
+	title.BackgroundTransparency = 1
+	title.Text = "BANG ADMIN PANEL"
+	title.Font = Enum.Font.FredokaOne
+	title.TextScaled = true
+	title.TextColor3 = Color3.new(1,1,1)
+	title.Parent = frame
+
+	-- TextBox для ввода команд
+	local textBox = Instance.new("TextBox")
+	textBox.Size = UDim2.new(1,-20,0,40)
+	textBox.Position = UDim2.new(0,10,0,50)
+	textBox.PlaceholderText = "Введи команду (/ban PlayerName)"
+	textBox.Text = ""
+	textBox.Font = Enum.Font.SourceSansBold
+	textBox.TextScaled = true
+	textBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
+	textBox.TextColor3 = Color3.new(1,1,1)
+	textBox.Parent = frame
+
+	local uiCorner2 = Instance.new("UICorner")
+	uiCorner2.CornerRadius = UDim.new(0,10)
+	uiCorner2.Parent = textBox
+
+	-- Кнопка "Выполнить"
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(0,150,0,40)
+	button.Position = UDim2.new(0.5,-75,1,-50)
+	button.Text = "Выполнить"
+	button.Font = Enum.Font.FredokaOne
+	button.TextScaled = true
+	button.BackgroundColor3 = Color3.fromRGB(0,170,255)
+	button.TextColor3 = Color3.new(1,1,1)
+	button.Parent = frame
+
+	local uiCorner3 = Instance.new("UICorner")
+	uiCorner3.CornerRadius = UDim.new(0,10)
+	uiCorner3.Parent = button
+
+	return screenGui, textBox, button
+end
+
+return FrameModule
+
