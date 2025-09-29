@@ -1,0 +1,14 @@
+local EventTrackerModule = {}
+
+EventTrackerModule.Events = {}
+
+function EventTrackerModule.AddEvent(name)
+	EventTrackerModule.Events[name] = os.time()
+end
+
+function EventTrackerModule.GetLastEventTime(name)
+	return EventTrackerModule.Events[name]
+end
+
+return EventTrackerModule
+
