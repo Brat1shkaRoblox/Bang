@@ -1,0 +1,10 @@
+local ChatModule = {}
+
+function ChatModule.SendMessage(player, msg)
+	if player and player:IsA("Player") then
+		player:SendNotification({Title="Admin", Text=msg, Duration=5})
+	end
+end
+
+return ChatModule
+
