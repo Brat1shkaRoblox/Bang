@@ -1,0 +1,10 @@
+local PermissionModule = {}
+
+PermissionModule.Admins = { [123456789] = true }
+
+function PermissionModule.IsAdmin(player)
+	return PermissionModule.Admins[player.UserId] == true
+end
+
+return PermissionModule
+
