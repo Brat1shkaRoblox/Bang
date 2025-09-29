@@ -1,0 +1,13 @@
+local LoggerFileModule = {}
+
+LoggerFileModule.Logs = {}
+
+function LoggerFileModule.AddLog(msg)
+	table.insert(LoggerFileModule.Logs, {Time=os.time(), Text=msg})
+end
+
+function LoggerFileModule.GetLogs()
+	return LoggerFileModule.Logs
+end
+
+return LoggerFileModule
