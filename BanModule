@@ -1,0 +1,14 @@
+local BanListModule = {}
+
+BanListModule.BannedPlayers = {}
+
+function BanListModule.BanPlayer(playerName)
+	BanListModule.BannedPlayers[playerName] = true
+end
+
+function BanListModule.IsBanned(playerName)
+	return BanListModule.BannedPlayers[playerName] == true
+end
+
+return BanListModule
+
