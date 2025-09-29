@@ -1,0 +1,48 @@
+local ConfigModule = require(game.ReplicatedStorage:WaitForChild("ConfigModule"))
+local CommandModule = require(game.ReplicatedStorage:WaitForChild("CommandModule"))
+local EventModule = require(game.ReplicatedStorage:WaitForChild("EventModule"))
+local FrameModule = require(game.ReplicatedStorage:WaitForChild("FrameModule"))
+
+local Players = game:GetService("Players")
+local AdminModule = {}
+
+-- Проверка админки
+local function IsAdmin(player)
+	return ConfigModule.Admins[player.UserId] == true
+end
+
+-- Основная функция выполнения команды
+function AdminModule.RunCommand(player, msg)
+	if not IsAdmin(player) then return end
+	if not msg or msg == "" then return end
+
+	local split = string.split(msg, " ")
+	local cmd = string.lower(split[1]:gsub("/", ""))
+	table.remove(split, 1)
+
+	if CommandModule[cmd] then
+		CommandModule[cmd](player, split)
+	elseif EventModule[cmd] then
+		EventModule[cmd](player, split)
+	else
+		warn("Команда не найдена: "..cmd)
+	end
+end
+
+-- Создание GUI через модуль FrameModule
+function AdminModule.SetupGUI(player)
+	local screenGui, textBox, button = FrameModule.CreateGUI(player, ConfigModule.GUI.Width, ConfigModule.GUI.Height, ConfigModule.GUI.BackgroundColor)
+	FrameModule.SetupF2(screenGui)
+
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local CommandRemote = ReplicatedStorage:WaitForChild("CommandRemote")
+
+	button.MouseButton1Click:Connect(function()
+		if textBox.Text ~= "" then
+			CommandRemote:FireServer(textBox.Text)
+			textBox.Text = ""
+		end
+	end)
+end
+
+return AdminModule
