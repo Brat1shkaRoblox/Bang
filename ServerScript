@@ -1,0 +1,14 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local AdminModule = require(ReplicatedStorage:WaitForChild("AdminModule"))
+
+local CommandRemote = ReplicatedStorage:FindFirstChild("CommandRemote")
+if not CommandRemote then
+	CommandRemote = Instance.new("RemoteEvent")
+	CommandRemote.Name = "CommandRemote"
+	CommandRemote.Parent = ReplicatedStorage
+end
+
+CommandRemote.OnServerEvent:Connect(function(player, msg)
+	AdminModule.RunCommand(player, msg)
+end)
+
