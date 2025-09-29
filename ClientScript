@@ -1,0 +1,36 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CommandRemote = ReplicatedStorage:WaitForChild("CommandRemote")
+local AdminModule = require(ReplicatedStorage:WaitForChild("AdminModule"))
+local player = game.Players.LocalPlayer
+
+-- Создаём GUI через модуль
+local screenGui, textBox, button = AdminModule.CreateGUI(player)
+
+-- F2 открытие/закрытие
+AdminModule.SetupF2(player, screenGui)
+
+-- Отправка команды на сервер
+button.MouseButton1Click:Connect(function()
+	if textBox.Text ~= "" then
+		CommandRemote:FireServer(textBox.Text)
+		textBox.Text = ""
+	end
+end)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CommandRemote = ReplicatedStorage:WaitForChild("CommandRemote")
+local AdminModule = require(ReplicatedStorage:WaitForChild("AdminModule"))
+local player = game.Players.LocalPlayer
+
+-- Создаём GUI через модуль
+local screenGui, textBox, button = AdminModule.CreateGUI(player)
+
+-- F2 открытие/закрытие
+AdminModule.SetupF2(player, screenGui)
+
+-- Отправка команды на сервер
+button.MouseButton1Click:Connect(function()
+	if textBox.Text ~= "" then
+		CommandRemote:FireServer(textBox.Text)
+		textBox.Text = ""
+	end
+end)
