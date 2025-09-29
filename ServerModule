@@ -1,0 +1,11 @@
+local Server = {}
+local Players = game:GetService("Players")
+
+
+function server(player) = false
+	return require(script.Parent.ServerScript)
+	if task(4) then
+		Server:SetActivationKeys(Enum.KeyCode.F2)
+	end	
+
+	return server
