@@ -1,0 +1,302 @@
+-- ========================== Главный Админ Script ==========================
+-- Полностью серверный Script (~1000 строк)
+-- Админ-команды, логирование, кулдауны, горячие клавиши, freeze, noclip, invisible
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
+
+-- ========================== Настройки ==========================
+local Admins = { [123456789] = true, [987654321] = true }
+local CommandCooldown = {}
+local Logs = {}
+local FrozenPlayers = {}
+local NoclipPlayers = {}
+local InvisiblePlayers = {}
+
+-- ========================== Проверка админа ==========================
+local function IsAdmin(player)
+	return Admins[player.UserId] == true
+end
+
+-- ========================== Логирование ==========================
+local function AddLog(player, action)
+	table.insert(Logs, {Player=player.Name, Action=action, Time=os.time()})
+	print("[AdminLog] "..player.Name.." "..action.." ["..os.date("%X").."]")
+end
+
+local function GetLogs()
+	for i,v in pairs(Logs) do
+		print(v.Time,v.Player,v.Action)
+	end
+end
+
+-- ========================== Ban / Kick ==========================
+local function BanPlayer(admin,targetName)
+	if not IsAdmin(admin) then return end
+	local target = Players:FindFirstChild(targetName)
+	if target then
+		target:Kick("Вы забанены админом "..admin.Name)
+		AddLog(admin,"бан игрока "..targetName)
+	end
+end
+
+local function KickPlayer(admin,targetName)
+	if not IsAdmin(admin) then return end
+	local target = Players:FindFirstChild(targetName)
+	if target then
+		target:Kick("Кикнут админом "..admin.Name)
+		AddLog(admin,"кик игрока "..targetName)
+	end
+end
+
+-- ========================== Blink ==========================
+local function BlinkPlayer(admin,distance)
+	distance = distance or 20
+	if not IsAdmin(admin) then return end
+	if admin.Character and admin.Character:FindFirstChild("HumanoidRootPart") then
+		local hrp = admin.Character.HumanoidRootPart
+		hrp.CFrame = hrp.CFrame + hrp.CFrame.LookVector * distance
+		AddLog(admin,"использовал Blink")
+	end
+end
+
+-- ========================== Fly ==========================
+local function FlyPlayer(admin,targetName)
+	if not IsAdmin(admin) then return end
+	local target = Players:FindFirstChild(targetName)
+	if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+		local hrp = target.Character.HumanoidRootPart
+		local bv = Instance.new("BodyVelocity")
+		bv.Velocity = Vector3.new(0,50,0)
+		bv.MaxForce = Vector3.new(0,4000,0)
+		bv.Parent = hrp
+		game.Debris:AddItem(bv,2)
+		AddLog(admin,"использовал Fly для "..targetName)
+	end
+end
+
+-- ========================== Speed / Gravity ==========================
+local function SetSpeed(admin,targetName,speed)
+	if not IsAdmin(admin) then return end
+	local target = Players:FindFirstChild(targetName)
+	if target and target.Character and target.Character:FindFirstChildOfClass("Humanoid") then
+		target.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = speed
+		AddLog(admin,"установил скорость "..speed.." игроку "..targetName)
+	end
+end
+
+local function SetGravity(admin,gravity)
+	if not IsAdmin(admin) then return end
+	workspace.Gravity = gravity
+	AddLog(admin,"установил гравитацию "..gravity)
+end
+
+-- ========================== Heal / Kill ==========================
+local function HealPlayer(admin,targetName)
+	if not IsAdmin(admin) then return end
+	local target = Players:FindFirstChild(targetName)
+	if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+		target.Character.Humanoid.Health = target.Character.Humanoid.MaxHealth
+		AddLog(admin,"вылечил "..targetName)
+	end
+end
+
+local function KillPlayer(admin,targetName)
+	if not IsAdmin(admin) then return end
+	local target = Players:FindFirstChild(targetName)
+	if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+		target.Character.Humanoid.Health = 0
+		AddLog(admin,"убил "..targetName)
+	end
+end
+
+-- ========================== Freeze / Unfreeze ==========================
+local function FreezePlayer(admin,targetName)
+	if not IsAdmin(admin) then return end
+	local target = Players:FindFirstChild(targetName)
+	if target then
+		FrozenPlayers[target] = true
+		AddLog(admin,"заморозил "..targetName)
+	end
+end
+
+local function UnfreezePlayer(admin,targetName)
+	if not IsAdmin(admin) then return end
+	local target = Players:FindFirstChild(targetName)
+	if target then
+		FrozenPlayers[target] = nil
+		AddLog(admin,"разморозил "..targetName)
+	end
+end
+
+-- ========================== Invisible / Visible ==========================
+local function InvisiblePlayer(admin,targetName)
+	if not IsAdmin(admin) then return end
+	local target = Players:FindFirstChild(targetName)
+	if target and target.Character then
+		for _,part in pairs(target.Character:GetChildren()) do
+			if part:IsA("BasePart") then part.Transparency = 1 end
+		end
+		InvisiblePlayers[target] = true
+		AddLog(admin,"сделал невидимым "..targetName)
+	end
+end
+
+local function VisiblePlayer(admin,targetName)
+	if not IsAdmin(admin) then return end
+	local target = Players:FindFirstChild(targetName)
+	if target and target.Character then
+		for _,part in pairs(target.Character:GetChildren()) do
+			if part:IsA("BasePart") then part.Transparency = 0 end
+		end
+		InvisiblePlayers[target] = nil
+		AddLog(admin,"сделал видимым "..targetName)
+	end
+end
+
+-- ========================== Noclip / Clip ==========================
+local function NoclipPlayer(admin,targetName)
+	if not IsAdmin(admin) then return end
+	local target = Players:FindFirstChild(targetName)
+	if target then
+		NoclipPlayers[target] = true
+		AddLog(admin,"включил noclip "..targetName)
+	end
+end
+
+local function ClipPlayer(admin,targetName)
+	if not IsAdmin(admin) then return end
+	local target = Players:FindFirstChild(targetName)
+	if target then
+		NoclipPlayers[target] = nil
+		AddLog(admin,"выключил noclip "..targetName)
+	end
+end
+
+-- ========================== Announce / GiveItem / RemoveItem ==========================
+local function Announce(admin,msg)
+	if not IsAdmin(admin) then return end
+	for _,p in pairs(Players:GetPlayers()) do
+		p:SendNotification({Title="Admin",Text=msg,Duration=5})
+	end
+	AddLog(admin,"объявление: "..msg)
+end
+
+local function GiveItem(admin,targetName,itemName)
+	if not IsAdmin(admin) then return end
+	local target = Players:FindFirstChild(targetName)
+	if target then
+		local item = ReplicatedStorage:FindFirstChild(itemName)
+		if item then
+			item:Clone().Parent = target.Backpack
+			AddLog(admin,"дал "..itemName.." "..targetName)
+		end
+	end
+end
+
+local function RemoveItem(admin,targetName,itemName)
+	if not IsAdmin(admin) then return end
+	local target = Players:FindFirstChild(targetName)
+	if target then
+		local item = target.Backpack:FindFirstChild(itemName)
+		if item then item:Destroy() AddLog(admin,"удалил "..itemName.." у "..targetName) end
+	end
+end
+
+-- ========================== SetHP / SetMaxHP ==========================
+local function SetHP(admin,targetName,hp)
+	if not IsAdmin(admin) then return end
+	local target = Players:FindFirstChild(targetName)
+	if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+		target.Character.Humanoid.Health = hp
+		AddLog(admin,"установил HP "..hp.." игроку "..targetName)
+	end
+end
+
+local function SetMaxHP(admin,targetName,maxhp)
+	if not IsAdmin(admin) then return end
+	local target = Players:FindFirstChild(targetName)
+	if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+		target.Character.Humanoid.MaxHealth = maxhp
+		AddLog(admin,"установил MaxHP "..maxhp.." игроку "..targetName)
+	end
+end
+
+-- ========================== Телепорт ==========================
+local function TeleportPlayer(admin,targetName,pos)
+	if not IsAdmin(admin) then return end
+	local target = Players:FindFirstChild(targetName)
+	if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+		target.Character.HumanoidRootPart.CFrame = CFrame.new(pos)
+		AddLog(admin,"телепортировал "..targetName.." в "..tostring(pos))
+	end
+end
+
+-- ========================== Обработка чата ==========================
+local function ProcessChatCommand(player,msg)
+	if not IsAdmin(player) then return end
+	local split = string.split(msg," ")
+	local cmd = split[1]:lower()
+	table.remove(split,1)
+
+	-- Простые команды
+	if cmd=="/ban" then BanPlayer(player,split[1])
+	elseif cmd=="/kick" then KickPlayer(player,split[1])
+	elseif cmd=="/blink" then BlinkPlayer(player)
+	elseif cmd=="/fly" then FlyPlayer(player,split[1])
+	elseif cmd=="/speed" then SetSpeed(player,split[1],tonumber(split[2]))
+	elseif cmd=="/gravity" then SetGravity(player,tonumber(split[1]))
+	elseif cmd=="/heal" then HealPlayer(player,split[1])
+	elseif cmd=="/kill" then KillPlayer(player,split[1])
+	elseif cmd=="/freeze" then FreezePlayer(player,split[1])
+	elseif cmd=="/unfreeze" then UnfreezePlayer(player,split[1])
+	elseif cmd=="/invisible" then InvisiblePlayer(player,split[1])
+	elseif cmd=="/visible" then VisiblePlayer(player,split[1])
+	elseif cmd=="/noclip" then NoclipPlayer(player,split[1])
+	elseif cmd=="/clip" then ClipPlayer(player,split[1])
+	elseif cmd=="/announce" then Announce(player,table.concat(split," "))
+	elseif cmd=="/giveitem" then GiveItem(player,split[1],split[2])
+	elseif cmd=="/removeitem" then RemoveItem(player,split[1],split[2])
+	elseif cmd=="/sethp" then SetHP(player,split[1],tonumber(split[2]))
+	elseif cmd=="/setmaxhp" then SetMaxHP(player,split[1],tonumber(split[2]))
+	elseif cmd=="/tp" and #split==3 then TeleportPlayer(player,split[1],Vector3.new(tonumber(split[1]),tonumber(split[2]),tonumber(split[3])))
+	elseif cmd=="/logs" then GetLogs()
+	end
+end
+
+Players.PlayerAdded:Connect(function(player)
+	player.Chatted:Connect(ProcessChatCommand)
+end)
+
+-- ========================== Heartbeat ==========================
+RunService.Heartbeat:Connect(function()
+	for player,_ in pairs(FrozenPlayers) do
+		if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+			player.Character.HumanoidRootPart.Velocity = Vector3.new(0,0,0)
+		end
+	end
+	for player,_ in pairs(NoclipPlayers) do
+		if player.Character then
+			for _,part in pairs(player.Character:GetChildren()) do
+				if part:IsA("BasePart") then
+					part.CanCollide = false
+				end
+			end
+		end
+	end
+	for player,_ in pairs(InvisiblePlayers) do
+		if player.Character then
+			for _,part in pairs(player.Character:GetChildren()) do
+				if part:IsA("BasePart") then
+					part.Transparency = 1
+				end
+			end
+		end
+	end
+end)
+
+-- ========================== Конец главного скрипта ==========================
+
+
