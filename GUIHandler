@@ -1,0 +1,7 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local AdminModule = require(ReplicatedStorage:WaitForChild("AdminModule"))
+local player = game.Players.LocalPlayer
+
+-- создаём GUI
+AdminModule.SetupGUI(player)
+
