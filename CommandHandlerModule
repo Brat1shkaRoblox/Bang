@@ -1,0 +1,16 @@
+local CommandHandlerModule = {}
+
+CommandHandlerModule.Commands = {}
+
+function CommandHandlerModule.AddCommand(name, func)
+	CommandHandlerModule.Commands[name] = func
+end
+
+function CommandHandlerModule.RunCommand(name, player, args)
+	if CommandHandlerModule.Commands[name] then
+		CommandHandlerModule.Commands[name](player, args)
+	end
+end
+
+return CommandHandlerModule
+
