@@ -1,0 +1,8 @@
+local LoggerModule = {}
+
+function LoggerModule.Log(msg)
+	print("[LOG] "..msg)
+end
+
+return LoggerModule
+
