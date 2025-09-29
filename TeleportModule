@@ -1,0 +1,10 @@
+local TeleportModule = {}
+
+function TeleportModule.TeleportPlayer(player, position)
+	if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+		player.Character.HumanoidRootPart.CFrame = CFrame.new(position)
+	end
+end
+
+return TeleportModule
+
