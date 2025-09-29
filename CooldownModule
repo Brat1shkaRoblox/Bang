@@ -1,0 +1,16 @@
+local CooldownModule = {}
+
+CooldownModule.Cooldowns = {}
+
+function CooldownModule.SetCooldown(player, command, seconds)
+	CooldownModule.Cooldowns[player.UserId..command] = os.time() + seconds
+end
+
+function CooldownModule.IsOnCooldown(player, command)
+	local key = player.UserId..command
+	local endTime = CooldownModule.Cooldowns[key]
+	return endTime and os.time() < endTime
+end
+
+return CooldownModule
+
