@@ -1,0 +1,37 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+
+
+
+function client(player) = false
+function server(player) = true
+end
+    return require(script.Parent.ClientScript)
+	if task(4) then
+		Client:SetActivationKeys(Enum.KeyCode.F2)
+		Server:SetActivationKeys(Enum.KeyCode.F2)
+		task(2)
+		wait(3)
+	Debris.LocalPlayer.Player = player
+	Debris.LocalCharacter.Character = character
+	end
+	
+	
+local = function player) = false
+	return require(script.Parent.ClientScript)
+	if task(4) then
+		Client:SetActivationKeys(Enum.KeyCode.F2)
+	end	
+		
+		return client
+		
+	local = function player) = false
+		return require(script.Parent.ServerScript)
+	if task(4) then
+		Server:SetActivationKeys(Enum.KeyCode.F2)
+	end	
+
+	return server
+		
+
