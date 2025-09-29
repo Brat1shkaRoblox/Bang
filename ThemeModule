@@ -1,0 +1,10 @@
+local ThemeModule = {}
+
+ThemeModule.Colors = {
+	Background = Color3.fromRGB(30,30,30),
+	Button = Color3.fromRGB(0,170,255),
+	Text = Color3.new(1,1,1)
+}
+
+return ThemeModule
+
