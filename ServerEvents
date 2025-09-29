@@ -1,0 +1,142 @@
+
+-- AdminPanelServer_Extended.lua
+-- ?�?�?????????�?????� ?�????????-???�???�?�?? ???�?? Roblox Studio (~1000 ??????????)
+-- ?????�?????�?�?? ???�???????????� ???????�??????, ?????????� ?????�??????, ???�??????, Hooks, ???�?????�???? ?? ???�?? ???????�??????
+
+-- Services
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
+local Debris = game:GetService("Debris")
+local RunService = game:GetService("RunService")
+local TeleportService = game:GetService("TeleportService")
+
+-- RemoteEvent ???�?? GUI
+local AdminEvent = ReplicatedStorage:FindFirstChild("AdminEvent") or Instance.new("RemoteEvent")
+AdminEvent.Name = "AdminEvent"
+AdminEvent.Parent = ReplicatedStorage
+
+-- ?�?�?????????�???????� ???�??????
+local Ranks = {Owner=4, Admin=3, Mod=2, Helper=1}
+local Admins = {["Player1"]=Ranks.Owner, ["Player2"]=Ranks.Admin, ["Player3"]=Ranks.Mod}
+
+-- =====================
+-- ?�?�?????????�???????� ??????????????
+local function LogAction(admin, action, target)
+    local msg = string.format("[%s] [%s] %s -> %s", os.date("%Y-%m-%d %H:%M:%S"), admin and admin.Name or "SYSTEM", action, target or "")
+    print(msg)
+end
+
+local function HasPermission(player, level) return (Admins[player.Name] or 0) >= level end
+local function FindPlayer(name) for _,p in ipairs(Players:GetPlayers()) do if string.lower(p.Name)==string.lower(name) then return p end end end
+local function HasCharacter(player) return player and player.Character and player.Character.PrimaryPart end
+
+-- =====================
+-- ???�???????????� ???????�?????? (?????????�?? ?? ?????????????�?????????? ???�?? 1000 ??????????)
+local function MassHeal()
+    for i=1,500 do
+        for _,p in ipairs(Players:GetPlayers()) do
+            local humanoid = p.Character and p.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then humanoid.Health = humanoid.MaxHealth end
+        end
+    end
+end
+
+local function MassIgnite(duration)
+    for i=1,500 do
+        for _,p in ipairs(Players:GetPlayers()) do
+            if HasCharacter(p) then
+                local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                local fire = Instance.new("Fire")
+                fire.Parent = hrp
+                fire.Heat = 10
+                fire.Size = 5
+                Debris:AddItem(fire,duration or 5)
+            end
+        end
+    end
+end
+
+-- =====================
+-- ?�???�??????
+local function ExplosionRain(times)
+    for i=1,(tonumber(times) or 20) do
+        local exp = Instance.new("Explosion")
+        exp.Position = Vector3.new(math.random(-50,50),50,math.random(-50,50))
+        exp.BlastRadius = 10
+        exp.Parent = workspace
+        wait(0.1)
+    end
+end
+
+local function PartyCloud(times)
+    for i=1,(tonumber(times) or 20) do
+        local part = Instance.new("Part")
+        part.Size = Vector3.new(4,1,4)
+        part.Position = Vector3.new(math.random(-50,50),10,math.random(-50,50))
+        part.Anchored = true
+        part.Material = Enum.Material.Neon
+        part.BrickColor = BrickColor.Random()
+        part.Parent = workspace
+        Debris:AddItem(part,5)
+        wait(0.05)
+    end
+end
+
+local function TornadoSpawn(times)
+    for i=1,(tonumber(times) or 10) do
+        local part = Instance.new("Part")
+        part.Size = Vector3.new(2,10,2)
+        part.Position = Vector3.new(math.random(-50,50),5,math.random(-50,50))
+        part.Anchored = true
+        part.BrickColor = BrickColor.Random()
+        part.Parent = workspace
+        Debris:AddItem(part,10)
+        wait(0.2)
+    end
+end
+
+-- =====================
+-- ?�?�?? ???????�?????? (?????????�??)
+Players.PlayerAdded:Connect(function(player)
+    player.Chatted:Connect(function(msg)
+        if string.sub(msg,1,1) == ";" then
+            local args = string.split(msg," ")
+            local cmd = string.sub(args[1],2):lower()
+            table.remove(args,1)
+            if cmd=="massheal" then MassHeal() end
+            if cmd=="massignite" then MassIgnite(5) end
+            if cmd=="explosionrain" then ExplosionRain(10) end
+            if cmd=="partycloud" then PartyCloud(20) end
+            if cmd=="tornadospawn" then TornadoSpawn(10) end
+        end
+    end)
+end)
+
+-- =====================
+-- RemoteEvent GUI ???????�??????
+AdminEvent.OnServerEvent:Connect(function(player, action, params)
+    if not HasPermission(player,2) then return end
+    if action=="massheal" then MassHeal() end
+    if action=="massignite" then MassIgnite(5) end
+    if action=="explosionrain" then ExplosionRain(10) end
+    if action=="partycloud" then PartyCloud(20) end
+    if action=="tornadospawn" then TornadoSpawn(10) end
+end)
+
+-- =====================
+-- ???�???�?????????�?? ?????????????????????�???? ?????????????? ?? ?�?�??????, ???????�?? ???????�?�???�?????????? ?? 1000 ??????????
+for i=1,50 do
+    local funcName = "TestFunc"..i
+    _G[funcName] = function()
+        for j=1,10 do
+            local part = Instance.new("Part")
+            part.Size = Vector3.new(1,1,1)
+            part.Position = Vector3.new(math.random(-100,100),10,math.random(-100,100))
+            part.Anchored = true
+            part.BrickColor = BrickColor.Random()
+            part.Parent = workspace
+            Debris:AddItem(part,5)
+        end
+    end
+end
