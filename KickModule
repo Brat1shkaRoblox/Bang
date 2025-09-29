@@ -1,0 +1,9 @@
+local KickModule = {}
+
+function KickModule.KickPlayer(player, reason)
+	if player and player:IsA("Player") then
+		player:Kick(reason or "Вы кикнуты")
+	end
+end
+
+return KickModule
