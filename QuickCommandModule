@@ -1,0 +1,13 @@
+local QuickCommandModule = {}
+
+function QuickCommandModule.CreateQuickButton(parent, text, callback)
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(0,100,0,40)
+	button.Text = text
+	button.Parent = parent
+	button.MouseButton1Click:Connect(callback)
+	return button
+end
+
+return QuickCommandModule
+
