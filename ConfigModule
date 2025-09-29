@@ -1,0 +1,17 @@
+local ConfigModule = {}
+
+-- Список админов по UserId
+ConfigModule.Admins = {
+	[123456789] = true, -- твой UserId
+	[987654321] = true
+}
+
+-- Настройки GUI
+ConfigModule.GUI = {
+	Width = 400,
+	Height = 150,
+	BackgroundColor = Color3.fromRGB(30,30,30)
+}
+
+return ConfigModule
+
