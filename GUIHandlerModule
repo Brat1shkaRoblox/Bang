@@ -1,0 +1,15 @@
+local GUIHelperModule = {}
+
+function GUIHelperModule.CreateButton(parent, text, size, position)
+	local button = Instance.new("TextButton")
+	button.Size = size or UDim2.new(0,150,0,40)
+	button.Position = position or UDim2.new(0,0,0,0)
+	button.Text = text
+	button.BackgroundColor3 = Color3.fromRGB(0,170,255)
+	button.TextColor3 = Color3.new(1,1,1)
+	button.Parent = parent
+	return button
+end
+
+return GUIHelperModule
+
