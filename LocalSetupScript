@@ -1,0 +1,123 @@
+-- ========================== Большой LocalScript ==========================
+-- Полностью клиентский LocalScript для управления игроком
+-- Функции: Blink, Fly, Speed, Gravity, Teleport, Чат команды, Горячие клавиши
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local ContextActionService = game:GetService("ContextActionService")
+local LocalPlayer = Players.LocalPlayer
+
+local Admins = { [123456789] = true } -- клиентская проверка (можно убрать для настоящих админов)
+local Logs = {}
+
+-- ========================== Логирование ==========================
+local function AddLog(action)
+	table.insert(Logs,{Action=action,Time=os.time()})
+	print("[ClientLog] "..action.." ["..os.date("%X").."]")
+end
+
+-- ========================== Blink ==========================
+local function Blink(distance)
+	distance = distance or 20
+	if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+		local hrp = LocalPlayer.Character.HumanoidRootPart
+		hrp.CFrame = hrp.CFrame + hrp.CFrame.LookVector * distance
+		AddLog("Использован Blink на "..distance)
+	end
+end
+
+-- ========================== Fly ==========================
+local FlyActive = false
+local FlySpeed = 50
+local BodyVelocity
+
+local function ToggleFly()
+	if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then return end
+	FlyActive = not FlyActive
+	if FlyActive then
+		BodyVelocity = Instance.new("BodyVelocity")
+		BodyVelocity.MaxForce = Vector3.new(4000,4000,4000)
+		BodyVelocity.Velocity = Vector3.new(0,0,0)
+		BodyVelocity.Parent = LocalPlayer.Character.HumanoidRootPart
+		AddLog("Fly включен")
+	else
+		if BodyVelocity then BodyVelocity:Destroy() end
+		AddLog("Fly выключен")
+	end
+end
+
+-- ========================== Speed ==========================
+local function SetSpeed(speed)
+	if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+		LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = speed
+		AddLog("Скорость установлена на "..speed)
+	end
+end
+
+-- ========================== Gravity ==========================
+local function SetGravity(gravity)
+	workspace.Gravity = gravity
+	AddLog("Гравитация установлена на "..gravity)
+end
+
+-- ========================== Teleport ==========================
+local function Teleport(pos)
+	if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+		LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(pos)
+		AddLog("Телепорт в "..tostring(pos))
+	end
+end
+
+-- ========================== Горячие клавиши ==========================
+UserInputService.InputBegan:Connect(function(input, processed)
+	if processed then return end
+	if input.KeyCode == Enum.KeyCode.F then
+		Blink(20)
+	elseif input.KeyCode == Enum.KeyCode.G then
+		ToggleFly()
+	elseif input.KeyCode == Enum.KeyCode.H then
+		SetSpeed(100)
+	elseif input.KeyCode == Enum.KeyCode.J then
+		SetGravity(50)
+	end
+end)
+
+-- ========================== Чат команды ==========================
+local function ProcessChatCommand(msg)
+	local split = string.split(msg," ")
+	local cmd = split[1]:lower()
+	table.remove(split,1)
+
+	if cmd == "/blink" then
+		Blink(tonumber(split[1]) or 20)
+	elseif cmd == "/fly" then
+		ToggleFly()
+	elseif cmd == "/speed" then
+		SetSpeed(tonumber(split[1]) or 16)
+	elseif cmd == "/gravity" then
+		SetGravity(tonumber(split[1]) or 196.2)
+	elseif cmd == "/tp" and #split == 3 then
+		Teleport(Vector3.new(tonumber(split[1]),tonumber(split[2]),tonumber(split[3])))
+	end
+end
+
+LocalPlayer.Chatted:Connect(ProcessChatCommand)
+
+-- ========================== Heartbeat ==========================
+RunService.RenderStepped:Connect(function()
+	if FlyActive and BodyVelocity and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+		local hrp = LocalPlayer.Character.HumanoidRootPart
+		local moveDir = Vector3.new()
+		if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + hrp.CFrame.LookVector end
+		if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - hrp.CFrame.LookVector end
+		if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - hrp.CFrame.RightVector end
+		if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + hrp.CFrame.RightVector end
+		if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0,1,0) end
+		if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then moveDir = moveDir - Vector3.new(0,1,0) end
+		BodyVelocity.Velocity = moveDir.Unit * FlySpeed
+	end
+end)
+
+-- ========================== Конец LocalScript ==========================
+
