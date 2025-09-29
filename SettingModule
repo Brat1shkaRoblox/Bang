@@ -1,0 +1,7 @@
+local SettingsModule = {}
+
+SettingsModule.ShowNotifications = true
+SettingsModule.CommandPrefix = "/"
+
+return SettingsModule
+
