@@ -1,0 +1,13 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CommandRemote = ReplicatedStorage:WaitForChild("CommandRemote")
+
+-- этот скрипт работает автоматически через кнопку в GUI, но можно юзать отдельно
+-- пример функции для вызова команды
+local function SendCommand(commandText)
+	if commandText ~= "" then
+		CommandRemote:FireServer(commandText)
+	end
+end
+
+-- пример вызова (не обязательно):
+-- SendCommand("/ban PlayerName")
